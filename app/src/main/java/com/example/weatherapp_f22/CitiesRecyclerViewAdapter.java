@@ -16,6 +16,13 @@ public class CitiesRecyclerViewAdapter extends RecyclerView.Adapter<CitiesRecycl
     ArrayList<City> list;
     Context context;
 
+    interface CitiesClickListener{
+        void onCityClicked(City selectedCity);
+    }
+
+    CitiesClickListener listener;
+
+
     public CitiesRecyclerViewAdapter(ArrayList<City> list, Context context) {
         this.list = list;
         this.context = context;
@@ -50,6 +57,14 @@ public class CitiesRecyclerViewAdapter extends RecyclerView.Adapter<CitiesRecycl
             super(itemView);
             city = itemView.findViewById(R.id.cityname);
             country = itemView.findViewById(R.id.countryname);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //
+                    listener.onCityClicked(list.get(getAdapterPosition()));
+                }
+            });
 
         }
     }

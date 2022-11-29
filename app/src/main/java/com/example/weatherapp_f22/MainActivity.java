@@ -5,6 +5,8 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -14,19 +16,23 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
-        NetworkingService.NetworkingListener {
+        NetworkingService.NetworkingListener ,
+        CitiesRecyclerViewAdapter.CitiesClickListener
+{
+
+    NetworkingService networkingService;
     ArrayList<City> cities = new ArrayList<>(0);
-    NetworkingService networkingService = new NetworkingService();
     RecyclerView rv;
     CitiesRecyclerViewAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        networkingService =( (MyApp)getApplication()).networkingService;
         networkingService.listener = this;
         rv = findViewById(R.id.citiesList);
         adapter = new CitiesRecyclerViewAdapter(cities,this);
-
+        adapter.listener = this;
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
 
@@ -56,7 +62,11 @@ public class MainActivity extends AppCompatActivity implements
                 Log.d("weather app", "changes " + newText);
                 if (newText.length() >= 3){
                     // get api result
-                    networkingService.connect(newText);
+                    networkingService.getCites(newText);
+                }
+                else {
+                    adapter.list = new ArrayList<>(0);
+                    adapter.notifyDataSetChanged();
                 }
                 return false;
             }
@@ -68,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @Override
-    public void citiesAPIISDoneWithResult(String json) {
+    public void connectionISDoneWithResult(String json) {
         Log.d("weather app " , json);
 
       cities = JsonService.getCitiesFromJsonString(json);
@@ -77,5 +87,18 @@ public class MainActivity extends AppCompatActivity implements
 
 
 
+    }
+
+    @Override
+    public void weatherIconDownoaded(Bitmap img) {
+
+    }
+
+    @Override
+    public void onCityClicked(City selectedCity) {
+        Intent intent = new Intent(this,WeatherActivity.class);
+        intent.putExtra("city",selectedCity);
+
+        startActivity(intent);
     }
 }

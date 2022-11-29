@@ -2,6 +2,7 @@ package com.example.weatherapp_f22;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -25,6 +26,22 @@ public class JsonService {
         }
 
         return cities;
+    }
+
+
+    public static WeatherData getWeatherFromJsonString(String json){
+        WeatherData weatherData = new WeatherData();
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            JSONArray weatherJsonArray = jsonObject.getJSONArray("weather");
+            weatherData.setDescription(weatherJsonArray.getJSONObject(0).getString("main"));
+            weatherData.setIcon(weatherJsonArray.getJSONObject(0).getString("icon"));
+            weatherData.setTemp(jsonObject.getJSONObject("main").getDouble("temp"));
+            weatherData.setHumidity(jsonObject.getJSONObject("main").getInt("humidity"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    return weatherData;
     }
 
 }

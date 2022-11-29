@@ -1,5 +1,7 @@
 package com.example.weatherapp_f22;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -14,10 +16,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NetworkingService {
+    String weatherURL1 = "https://api.openweathermap.org/data/2.5/weather?q=";
+    String weatherURL2 = "&appid=071c3ffca10be01d334505630d2c1a9c";
 
     // call back // listeners
     interface NetworkingListener{
-         void citiesAPIISDoneWithResult(String json);
+         void connectionISDoneWithResult(String json);
+         void weatherIconDownoaded(Bitmap img);
     }
 
     public NetworkingListener listener;
@@ -27,15 +32,49 @@ public class NetworkingService {
     ExecutorService networkingExecutorService = Executors.newFixedThreadPool(4);
     Handler newtworkingHandler = new Handler(Looper.getMainLooper());
 
+    public void getCites(String q){
+        String url = cityAPIURL + q;
+        connect(url);
+    }
 
-    public void connect(String q){
+    public void getWeather(String city){
+        String url = weatherURL1 + city +weatherURL2;
+        connect(url);
+    }
+
+    public void getIcon(String icon){
+        String urlstring = "http://openweathermap.org/img/wn/"+icon+"@2x.png";
+        networkingExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(urlstring);
+                    InputStream in = (InputStream) url.getContent();
+                    Bitmap imageData = BitmapFactory.decodeStream(in);
+                    newtworkingHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.weatherIconDownoaded(imageData);
+                        }
+                    });
+
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void connect(String urlstring){// general function for all connection
         networkingExecutorService.execute(new Runnable() {
             HttpURLConnection urlConnection;
             @Override
             public void run() {
                 // run in background thread
                 try {
-                    URL url = new URL(cityAPIURL+q);
+                    URL url = new URL(urlstring);
                     urlConnection  = (HttpURLConnection)url.openConnection();
                     urlConnection.setRequestMethod("GET");
                     urlConnection.setRequestProperty("Content-Type", "application/json");
@@ -54,7 +93,7 @@ public class NetworkingService {
                     newtworkingHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                           listener.citiesAPIISDoneWithResult(json);
+                           listener.connectionISDoneWithResult(json);
                         }
                     });
 
