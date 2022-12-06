@@ -1,10 +1,12 @@
 package com.example.weatherapp_f22;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -17,7 +19,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
         NetworkingService.NetworkingListener ,
-        CitiesRecyclerViewAdapter.CitiesClickListener
+        CitiesRecyclerViewAdapter.CitiesClickListener ,
+        DBManager.DatabaseListener
 {
 
     NetworkingService networkingService;
@@ -35,7 +38,8 @@ public class MainActivity extends AppCompatActivity implements
         adapter.listener = this;
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
-
+        ((MyApp)getApplication()).dbManager.getDB(this);
+        ((MyApp)getApplication()).dbManager.listener = this;
 
     }
 
@@ -96,9 +100,36 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onCityClicked(City selectedCity) {
-        Intent intent = new Intent(this,WeatherActivity.class);
-        intent.putExtra("city",selectedCity);
 
-        startActivity(intent);
+        showAlert(selectedCity);
+    }
+
+    void showAlert(City city){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to save "+ city.city+ " in your DB ??");
+        builder.setNegativeButton("No",null);
+        builder.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // save the city into db.
+                ((MyApp)getApplication()).dbManager.insertNewCityAsync(city);
+            }
+        });
+        builder.create().show();
+
+    }
+
+    @Override
+    public void insertingCityCompleted() {
+        finish();
+    }
+
+    @Override
+    public void gettingAllCityCompleted(City[] l) {
+
+    }
+
+    @Override
+    public void deletingCityCompleted() {
+
     }
 }

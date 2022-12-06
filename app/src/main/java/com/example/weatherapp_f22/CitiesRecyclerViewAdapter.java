@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class CitiesRecyclerViewAdapter extends RecyclerView.Adapter<CitiesRecyclerViewAdapter.CitiesViewHolder> {
+public class CitiesRecyclerViewAdapter
+        extends RecyclerView.Adapter<CitiesRecyclerViewAdapter.CitiesViewHolder> {
 
     ArrayList<City> list;
     Context context;
@@ -61,7 +62,7 @@ public class CitiesRecyclerViewAdapter extends RecyclerView.Adapter<CitiesRecycl
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //
+
                     listener.onCityClicked(list.get(getAdapterPosition()));
                 }
             });
