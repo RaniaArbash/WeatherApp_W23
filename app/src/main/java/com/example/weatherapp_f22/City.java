@@ -8,8 +8,7 @@ import androidx.room.PrimaryKey;
 
 @Entity
 public class City implements Parcelable {
-    @PrimaryKey(autoGenerate = true)
-    int id;
+
     String city;
     String country;
 
@@ -18,8 +17,8 @@ public class City implements Parcelable {
     public City() {
     }
 
-    public City(int id, String city, String country) {
-        this.id = id;
+    public City( String city, String country) {
+
         this.city = city;
         this.country = country;
     }
@@ -28,19 +27,32 @@ public class City implements Parcelable {
 
 
     City(String fullCityString){
+        // Toronto, On, Canada ==> Toronto Canada
+        String state = "";
         char[] list = fullCityString.toCharArray();
         for (int i = 0 ; i<list.length; i++){
             if (list[i] == ','){
-                city = fullCityString.substring(0, i );
-                country = fullCityString.substring(i + 1 , fullCityString.length());
+
+                city = fullCityString.substring(0, i);
+                i = i + 1;
+
+                for (int j = i; j < list.length ; j++) {
+                    if (list[j] == ',') {
+
+                        country = fullCityString.substring(j + 2, fullCityString.length());
+                        break;
+                    }
+
+                }
                 break;
+
             }
         }
     }
 
 
     protected City(Parcel in) {
-        id = in.readInt();
+
         city = in.readString();
         country = in.readString();
     }
@@ -64,7 +76,7 @@ public class City implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(id);
+
         parcel.writeString(city);
         parcel.writeString(country);
     }

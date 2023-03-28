@@ -18,9 +18,8 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
-        NetworkingService.NetworkingListener ,
-        CitiesRecyclerViewAdapter.CitiesClickListener ,
-        DBManager.DatabaseListener
+       CitiesRecyclerViewAdapter.CitiesClickListener, NetworkingService.NetworkingCallBack
+
 {
 
     NetworkingService networkingService;
@@ -38,8 +37,6 @@ public class MainActivity extends AppCompatActivity implements
         adapter.listener = this;
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
-        ((MyApp)getApplication()).dbManager.getDB(this);
-        ((MyApp)getApplication()).dbManager.listener = this;
 
     }
 
@@ -51,13 +48,13 @@ public class MainActivity extends AppCompatActivity implements
 
         SearchView searchView = (SearchView) searchViewmenue.getActionView();
 
-        //String cityQuery = searchView.getQuery().toString();
+        //String cityQuery = searchView.getQuery().toString()
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d("weather app",  "Query " + query);
-
+                /// search for the city in my networking class
                 return false;
             }
 
@@ -65,8 +62,9 @@ public class MainActivity extends AppCompatActivity implements
             public boolean onQueryTextChange(String newText) {
                 Log.d("weather app", "changes " + newText);
                 if (newText.length() >= 3){
-                    // get api result
-                    networkingService.getCites(newText);
+
+                    networkingService. getCities(newText);
+
                 }
                 else {
                     adapter.list = new ArrayList<>(0);
@@ -82,54 +80,25 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @Override
-    public void connectionISDoneWithResult(String json) {
-        Log.d("weather app " , json);
-
-      cities = JsonService.getCitiesFromJsonString(json);
-      adapter.list = cities;
-      adapter.notifyDataSetChanged();
-
-
-
+    protected void onResume() {
+        super.onResume();
+        networkingService.listener = this;
     }
-
-    @Override
-    public void weatherIconDownoaded(Bitmap img) {
-
-    }
-
     @Override
     public void onCityClicked(City selectedCity) {
 
-        showAlert(selectedCity);
-    }
-
-    void showAlert(City city){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure you want to save "+ city.city+ " in your DB ??");
-        builder.setNegativeButton("No",null);
-        builder.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // save the city into db.
-                ((MyApp)getApplication()).dbManager.insertNewCityAsync(city);
-            }
-        });
-        builder.create().show();
+        Intent intent = new Intent(this,WeatherActivity.class);
+        intent.putExtra("city",selectedCity);
+        startActivity(intent);
 
     }
+
 
     @Override
-    public void insertingCityCompleted() {
-        finish();
-    }
-
-    @Override
-    public void gettingAllCityCompleted(City[] l) {
-
-    }
-
-    @Override
-    public void deletingCityCompleted() {
-
+    public void networkingFinishWithJsonString(String json) {
+        Log.d("weather",json);
+        cities = JsonService.getListOfCities(json);
+        adapter.list = cities;
+        adapter.notifyDataSetChanged();
     }
 }

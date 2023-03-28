@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class HomeActivity extends AppCompatActivity
-        implements DBManager.DatabaseListener,
+        implements
         CitiesRecyclerViewAdapter.CitiesClickListener {
 
 
@@ -28,33 +28,12 @@ public class HomeActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         list = findViewById(R.id.homeCitiesList);
-        ((MyApp)getApplication()).dbManager.listener = this;
-        ((MyApp)getApplication()).dbManager.getDB(this);
         adapter = new CitiesRecyclerViewAdapter(citiesArray,this);
         adapter.listener = this;
 
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
-
-
-        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            public boolean onMove(RecyclerView recyclerView,
-                                  RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-
-                return true;// true if moved, false otherwise
-            }
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                //Remove swiped item from list and notify the RecyclerView
-                ((MyApp)getApplication()).dbManager.deleteCityAsync(citiesArray.get(viewHolder.getAdapterPosition()));
-
-            }
-        };
-
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
-        itemTouchHelper.attachToRecyclerView(list);
     }
 
 
@@ -62,8 +41,7 @@ public class HomeActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         adapter.listener = this;
-        ((MyApp)getApplication()).dbManager.listener = this;
-        ((MyApp)getApplication()).dbManager.getAllCitiesAcync();
+
     }
 
     @Override
@@ -85,24 +63,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
 
-    @Override
-    public void insertingCityCompleted() {
 
-    }
-
-    @Override
-    public void gettingAllCityCompleted(City[] l) {
-        citiesArray = new ArrayList<>(Arrays.asList(l));
-        adapter.list = citiesArray;
-        adapter.notifyDataSetChanged();
-       // adapter = new CitiesRecyclerViewAdapter(citiesArray,this);
-
-    }
-
-    @Override
-    public void deletingCityCompleted() {
-        ((MyApp)getApplication()).dbManager.getAllCitiesAcync();
-    }
 
     @Override
     public void onCityClicked(City selectedCity) {

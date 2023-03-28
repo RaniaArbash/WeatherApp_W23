@@ -9,8 +9,4 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class MyApp extends Application {
     NetworkingService networkingService = new NetworkingService();
 
-    DBManager dbManager = new DBManager();
-
-   static ExecutorService executorService = Executors.newFixedThreadPool(4);
-
 }
