@@ -18,25 +18,27 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
-       CitiesRecyclerViewAdapter.CitiesClickListener, NetworkingService.NetworkingCallBack
-
+       CitiesRecyclerViewAdapter.CitiesClickListener,
+        NetworkingManager.NetworkingCallBackInterface
 {
-
-    NetworkingService networkingService;
     ArrayList<City> cities = new ArrayList<>(0);
     RecyclerView rv;
     CitiesRecyclerViewAdapter adapter;
+    NetworkingManager networkingManager;
+    DatabaseManager databaseManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        networkingService =( (MyApp)getApplication()).networkingService;
-        networkingService.listener = this;
+
         rv = findViewById(R.id.citiesList);
         adapter = new CitiesRecyclerViewAdapter(cities,this);
         adapter.listener = this;
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
+        networkingManager = ((MyApp)getApplication()).networkingManager;
+        databaseManager = ((MyApp)getApplication()).databaseManager;
+        DatabaseManager.getDB(this);
 
     }
 
@@ -45,25 +47,21 @@ public class MainActivity extends AppCompatActivity implements
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.weather_menu,menu);
         MenuItem searchViewmenue = menu.findItem(R.id.searchbar);
-
         SearchView searchView = (SearchView) searchViewmenue.getActionView();
-
-        //String cityQuery = searchView.getQuery().toString()
-
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d("weather app",  "Query " + query);
+                Log.d("weather app",  "Query submit " + query);
                 /// search for the city in my networking class
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Log.d("weather app", "changes " + newText);
+                Log.d("weather app", "Query changes " + newText);
                 if (newText.length() >= 3){
-
-                    networkingService. getCities(newText);
+                    // I need to call my networking function to get all cities
+                    networkingManager.getCities(newText);
 
                 }
                 else {
@@ -82,23 +80,34 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        networkingService.listener = this;
+        networkingManager.listener = this;
     }
+
     @Override
     public void onCityClicked(City selectedCity) {
+        // we should have an alert here to ask the user
+        //save the selected city to DB
 
-        Intent intent = new Intent(this,WeatherActivity.class);
-        intent.putExtra("city",selectedCity);
-        startActivity(intent);
+        databaseManager.insertNewCity(selectedCity);
+        finish();
+
+//        Intent intent = new Intent(this,WeatherActivity.class);
+//        intent.putExtra("city",selectedCity);
+//        startActivity(intent);
 
     }
 
 
     @Override
-    public void networkingFinishWithJsonString(String json) {
-        Log.d("weather",json);
-        cities = JsonService.getListOfCities(json);
-        adapter.list = cities;
+    public void networkingManagerCompleteWithJsonString(String jsonString) {
+        // parse json string
+        adapter.list = JsonManager.fromJsonStringToList(jsonString);
+
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void newtworkingMangerCompleteWithWeatherIcon(Bitmap image) {
+
     }
 }

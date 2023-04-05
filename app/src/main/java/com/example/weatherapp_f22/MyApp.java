@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class MyApp extends Application {
-    NetworkingService networkingService = new NetworkingService();
 
+    NetworkingManager networkingManager = new NetworkingManager();
+    DatabaseManager databaseManager = new DatabaseManager();
 }
