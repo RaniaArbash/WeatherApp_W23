@@ -7,9 +7,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MultithreadingManager {
-   static ExecutorService executorService =
+
+    static  ExecutorService executorService =
             Executors.newFixedThreadPool(4);
 
-  static   Handler handler = new Handler(Looper.getMainLooper());
-
+    static  Handler handler = new Handler(Looper.getMainLooper());
 }

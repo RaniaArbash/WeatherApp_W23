@@ -11,7 +11,6 @@ import android.widget.TextView;
 public class WeatherActivity extends AppCompatActivity implements
         NetworkingManager.NetworkingCallBackInterface
         {
-
     TextView tempText;
     TextView humText;
     TextView desText;

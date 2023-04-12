@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements
         inflater.inflate(R.menu.weather_menu,menu);
         MenuItem searchViewmenue = menu.findItem(R.id.searchbar);
         SearchView searchView = (SearchView) searchViewmenue.getActionView();
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
